@@ -1,6 +1,6 @@
-# GATE INSIGHT - Adaptive Learning System
+# GATE AI - Adaptive Learning System
 
-GATE INSIGHT is an intelligent adaptive learning platform designed to help students prepare for GATE (Graduate Aptitude Test in Engineering) examinations. The system leverages advanced NLP techniques, including BERT-based models and Together AI's LLM API, to provide personalized learning experiences through adaptive question generation and intelligent progress tracking.
+GATE AI is an intelligent adaptive learning platform designed to help students prepare for GATE (Graduate Aptitude Test in Engineering) examinations. The system leverages advanced NLP techniques, including BERT-based models and Together AI's LLM API, to provide personalized learning experiences through adaptive question generation and intelligent progress tracking.
 
 ## Key Features
 
