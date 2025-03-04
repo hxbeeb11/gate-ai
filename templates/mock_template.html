@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Test - GATE AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding-bottom: 60px;
+        }
+        .question-card {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .option-btn {
+            width: 100%;
+            margin: 8px 0;
+            text-align: left;
+            padding: 12px 15px;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            background-color: white;
+            color: #495057;
+            cursor: pointer;
+        }
+        .option-btn:hover {
+            transform: translateX(5px);
+            background-color: #f8f9fa;
+            border-color: #0d6efd;
+        }
+        .option-btn.selected {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+        .option-btn.correct {
+            background-color: #198754;
+            color: white;
+            border-color: #198754;
+        }
+        .option-btn.incorrect {
+            background-color: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .question-numbers {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .question-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            background-color: #ffffff;
+            color: #495057;
+            border: 1px solid #dee2e6;
+        }
+        .question-number.visited {
+            background-color: #dc3545;
+            color: white;
+        }
+        .question-number.current {
+            background-color: #0d6efd;
+            color: white;
+            transform: scale(1.1);
+        }
+        .question-number.answered {
+            background-color: #198754;
+            color: white;
+        }
+        .question-number.marked {
+            background-color: #6f42c1;
+            color: white;
+        }
+        .timer {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #dc3545;
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .subject-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #e9ecef;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+        .navigation-buttons {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .question-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #0d6efd;
+            border-radius: 4px;
+            display: none;
+        }
+        .legend {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .legend div {
+            margin: 5px 0;
+        }
+        .bg-purple {
+            background-color: #6f42c1 !important;
+            color: white !important;
+        }
+        .question-type-badge {
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .numerical-input {
+            position: relative;
+            max-width: 300px;
+        }
+        .units-label {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        .form-check {
+            margin: 10px 0;
+        }
+        .form-check-label {
+            cursor: pointer;
+            padding: 10px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        .form-check-input:checked + .form-check-label {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Add Modal for Confirmation -->
+    <div class="modal fade" id="submitConfirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Submit Test</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to submit the test?</p>
+                    <div class="d-flex justify-content-between">
+                        <span>Questions Answered: <span id="answeredCount">0</span>/<span id="totalCount">0</span></span>
+                        <span>Time Remaining: <span id="remainingTime">00:00</span></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmSubmit()">Submit Test</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Modal for Time Warning -->
+    <div class="modal fade" id="timeWarningModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning">Time Warning</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>⚠️ Only 5 minutes remaining! The test will be automatically submitted when time runs out.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Continue Test</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Modal for Auto Submit -->
+    <div class="modal fade" id="autoSubmitModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">Time's Up!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Time is up! Your test is being submitted automatically.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">GATE AI</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Questions Column -->
+            <div class="col-md-8">
+                <div id="questions-container">
+                    <!-- Questions will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Sidebar Column -->
+            <div class="col-md-4">
+                <div class="sidebar">
+                    <div class="timer" id="timer">60:00</div>
+                    <div class="question-navigation">
+                        <h5>Question Navigation</h5>
+                        <ul class="nav nav-tabs mb-3" id="questionTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">General</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="subjects-tab" data-bs-toggle="tab" data-bs-target="#subjects" type="button" role="tab">Subjects</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="questionTabContent">
+                            <div class="tab-pane fade show active" id="general" role="tabpanel">
+                                <div class="question-numbers" id="general-numbers">
+                                    <!-- General question numbers (1-10) will be added here -->
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="subjects" role="tabpanel">
+                                <div class="question-numbers" id="subjects-numbers">
+                                    <!-- Subject question numbers (11-65) will be added here -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="legend">
+                            <div><span class="badge bg-success">■</span> Answered <span id="answered-count">(0)</span></div>
+                            <div><span class="badge bg-danger">■</span> Unanswered <span id="unanswered-count">(0)</span></div>
+                            <div><span class="badge bg-primary">■</span> Current </div>
+                            <div><span class="badge bg-purple">■</span> Marked for Review <span id="marked-count">(0)</span></div>
+                        </div>
+                        <div class="mt-4">
+                            <button class="btn btn-primary w-100" onclick="submitQuiz(event)">Submit Test</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestionIndex = 0;
+        let questionsData = [];
+        let userAnswers = new Map();
+        let markedQuestions = new Set();
+        let visitedQuestions = new Set();
+        let tempSelectedOption = new Map(); // Store temporarily selected options
+        let timeLeft = 3600; // 60 minutes
+        let timerInterval;
+
+        function createQuestionHtml(question, index) {
+            if (question.type === 'numerical') {
+                return `
+                    <div class="question-card" id="question-${index}" style="display: ${index === 0 ? 'block' : 'none'}">
+                        <div class="subject-tag">${question.subject}</div>
+                        <div class="question-type-badge badge bg-info mb-2">Numerical Answer</div>
+                        <h5 class="mb-3">Question ${index + 1}</h5>
+                        <p class="mb-4">${question.question}</p>
+                        <div class="numerical-input mb-3">
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="numerical-${index}"
+                                   step="0.01"
+                                   placeholder="Enter your numerical answer"
+                                   ${question.units ? `data-units="${question.units}"` : ''}>
+                            ${question.units ? `<span class="units-label">${question.units}</span>` : ''}
+                        </div>
+                        <div class="question-actions">
+                            <button class="btn btn-success" onclick="selectAndNext(${index})">Submit & Next</button>
+                            <button class="btn bg-purple" onclick="markForReview()">Mark for Review</button>
+                        </div>
+                        <div class="feedback"></div>
+                        <div class="explanation">${question.explanation}</div>
+                    </div>
+                `;
+            } else if (question.type === 'multiple_answer') {
+                return `
+                    <div class="question-card" id="question-${index}" style="display: ${index === 0 ? 'block' : 'none'}">
+                        <div class="subject-tag">${question.subject}</div>
+                        <div class="question-type-badge badge bg-warning mb-2">Multiple Correct Options</div>
+                        <h5 class="mb-3">Question ${index + 1}</h5>
+                        <p class="mb-4">${question.question}</p>
+                        <div class="options">
+                            ${question.options.map((option, i) => `
+                                <div class="option-wrapper">
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               class="form-check-input" 
+                                               id="q${index}-opt${i}"
+                                               onchange="handleMultipleAnswer(${index}, ${i})">
+                                        <label class="form-check-label option-btn w-100" 
+                                               for="q${index}-opt${i}">
+                                            ${option}
+                                        </label>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="question-actions">
+                            <button class="btn btn-success" onclick="selectAndNext(${index})">Submit & Next</button>
+                            <button class="btn bg-purple" onclick="markForReview()">Mark for Review</button>
+                        </div>
+                        <div class="feedback"></div>
+                        <div class="explanation">${question.explanation}</div>
+                    </div>
+                `;
+            } else {
+                // Original single answer MCQ format
+                return `
+                    <div class="question-card" id="question-${index}" style="display: ${index === 0 ? 'block' : 'none'}">
+                        <div class="subject-tag">${question.subject}</div>
+                        <div class="question-type-badge badge bg-primary mb-2">Single Choice</div>
+                        <h5 class="mb-3">Question ${index + 1}</h5>
+                        <p class="mb-4">${question.question}</p>
+                        <div class="options">
+                            ${question.options.map((option, i) => `
+                                <div class="option-wrapper">
+                                    <button type="button" 
+                                            class="option-btn"
+                                            onclick="highlightOption(${index}, ${i})"
+                                            id="q${index}-opt${i}">
+                                        ${option}
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="question-actions">
+                            <button class="btn btn-success" onclick="selectAndNext(${index})">Select & Next</button>
+                            <button class="btn bg-purple" onclick="markForReview()">Mark for Review</button>
+                        </div>
+                        <div class="feedback"></div>
+                        <div class="explanation">${question.explanation}</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function fetchQuestions() {
+            try {
+                // Show loading state
+                const container = document.getElementById('questions-container');
+                container.innerHTML = `
+                    <div class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Loading questions...</p>
+                    </div>
+                `;
+
+                const response = await fetch('/api/get_mock_questions');
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to fetch questions');
+                }
+                
+                questionsData = data;
+                container.innerHTML = ''; // Clear loading state
+                
+                // Create HTML for each question based on its type
+                questionsData.forEach((question, index) => {
+                    const questionHtml = createQuestionHtml(question, index);
+                    container.insertAdjacentHTML('beforeend', questionHtml);
+                });
+
+                // Initialize the UI after questions are loaded
+                initializeUI();
+            } catch (error) {
+                console.error('Error:', error);
+                const container = document.getElementById('questions-container');
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h4>Error Loading Questions</h4>
+                        <p>${error.message}</p>
+                        <button class="btn btn-primary mt-3" onclick="window.location.reload()">Try Again</button>
+                        <a href="/" class="btn btn-secondary mt-3 ms-2">Return to Dashboard</a>
+                    </div>
+                `;
+            }
+        }
+
+        function initializeUI() {
+            // Reset all state
+            currentQuestionIndex = 0;
+            userAnswers = new Map();
+            markedQuestions = new Set();
+            visitedQuestions = new Set();
+            tempSelectedOption = new Map();
+            
+            // Update the question navigation
+            updateQuestionNumbers();
+            
+            // Start the timer
+            startTimer();
+            
+            // Update the legend counts
+            updateLegendCounts();
+        }
+
+        function updateLegendCounts() {
+            const answeredCount = userAnswers.size;
+            const unansweredCount = visitedQuestions.size;
+            const markedCount = markedQuestions.size;
+            
+            // Update counts in the legend
+            const answeredElement = document.getElementById('answered-count');
+            const unansweredElement = document.getElementById('unanswered-count');
+            const markedElement = document.getElementById('marked-count');
+            
+            if (answeredElement) answeredElement.textContent = `(${answeredCount})`;
+            if (unansweredElement) unansweredElement.textContent = `(${unansweredCount})`;
+            if (markedElement) markedElement.textContent = `(${markedCount})`;
+        }
+
+        function updateQuestionNumbers() {
+            const generalContainer = document.getElementById('general-numbers');
+            const subjectsContainer = document.getElementById('subjects-numbers');
+            if (!generalContainer || !subjectsContainer) return; // Guard clause
+            
+            generalContainer.innerHTML = '';
+            subjectsContainer.innerHTML = '';
+            
+            questionsData.forEach((question, index) => {
+                const numberDiv = document.createElement('div');
+                numberDiv.className = 'question-number';
+                
+                // Apply states in order of priority
+                if (index === currentQuestionIndex) {
+                    numberDiv.classList.add('current');
+                } else if (userAnswers.has(index)) {
+                    numberDiv.classList.add('answered');
+                } else if (markedQuestions.has(index)) {
+                    numberDiv.classList.add('marked');
+                } else if (visitedQuestions.has(index)) {
+                    numberDiv.classList.add('visited');
+                }
+                
+                numberDiv.textContent = index + 1;
+                numberDiv.onclick = () => showQuestion(index);
+                
+                // Place in appropriate container based on subject
+                if (question.subject === 'Aptitude and Reasoning') {
+                    generalContainer.appendChild(numberDiv);
+                } else {
+                    subjectsContainer.appendChild(numberDiv);
+                }
+            });
+            
+            // Update the legend counts after updating question numbers
+            updateLegendCounts();
+        }
+
+        function startTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval); // Clear any existing timer
+            }
+            
+            timeLeft = 3600; // Reset to 60 minutes
+            const timerElement = document.getElementById('timer');
+            if (!timerElement) return; // Guard clause
+            
+            timerElement.textContent = '60:00';
+            
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    const autoSubmitModal = new bootstrap.Modal(document.getElementById('autoSubmitModal'));
+                    autoSubmitModal.show();
+                    setTimeout(() => {
+                        submitQuiz(new Event('timeout'));
+                    }, 2000);
+                    return;
+                }
+                
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Show warning at 5 minutes
+                if (timeLeft === 300) {
+                    const warningModal = new bootstrap.Modal(document.getElementById('timeWarningModal'));
+                    warningModal.show();
+                    timerElement.style.color = '#dc3545';
+                }
+            }, 1000);
+        }
+
+        function highlightOption(questionIndex, optionIndex) {
+            // Remove selected class from all options in this question
+            const questionCard = document.getElementById(`question-${questionIndex}`);
+            questionCard.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Add selected class to chosen option
+            const selectedBtn = document.getElementById(`q${questionIndex}-opt${optionIndex}`);
+            selectedBtn.classList.add('selected');
+            
+            // Store the selection temporarily
+            tempSelectedOption.set(questionIndex, optionIndex);
+        }
+
+        function selectAndNext(questionIndex) {
+            const question = questionsData[questionIndex];
+            let isValid = false;
+            let selectedAnswer;
+
+            if (question.type === 'numerical') {
+                const input = document.getElementById(`numerical-${questionIndex}`);
+                const value = parseFloat(input.value);
+                if (!isNaN(value)) {
+                    selectedAnswer = value;
+                    isValid = true;
+                }
+            } else if (question.type === 'multiple_answer') {
+                const selectedOptions = tempSelectedOption.get(questionIndex);
+                if (selectedOptions && selectedOptions.length > 0) {
+                    selectedAnswer = selectedOptions;
+                    isValid = true;
+                }
+            } else {
+                // Single answer MCQ
+                if (tempSelectedOption.has(questionIndex)) {
+                    selectedAnswer = tempSelectedOption.get(questionIndex);
+                    isValid = true;
+                }
+            }
+
+            if (isValid) {
+                // Save the answer
+                userAnswers.set(questionIndex, selectedAnswer);
+                
+                // Remove from visited since it's now answered
+                visitedQuestions.delete(questionIndex);
+                
+                // Move to next question if not the last one
+                if (questionIndex < questionsData.length - 1) {
+                    showQuestion(questionIndex + 1);
+                }
+                
+                updateQuestionNumbers();
+            } else {
+                alert('Please provide an answer before proceeding');
+            }
+        }
+
+        function showQuestion(index) {
+            // Mark previous question as visited if not answered
+            if (!userAnswers.has(currentQuestionIndex)) {
+                visitedQuestions.add(currentQuestionIndex);
+            }
+
+            document.querySelectorAll('.question-card').forEach(card => card.style.display = 'none');
+            document.getElementById(`question-${index}`).style.display = 'block';
+            
+            // Restore any temporary selection
+            const questionCard = document.getElementById(`question-${index}`);
+            questionCard.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            if (tempSelectedOption.has(index)) {
+                const selectedBtn = document.getElementById(`q${index}-opt${tempSelectedOption.get(index)}`);
+                selectedBtn.classList.add('selected');
+            }
+            
+            currentQuestionIndex = index;
+            updateQuestionNumbers();
+        }
+
+        function markForReview() {
+            if (markedQuestions.has(currentQuestionIndex)) {
+                markedQuestions.delete(currentQuestionIndex);
+            } else {
+                markedQuestions.add(currentQuestionIndex);
+                // If this question was marked as visited, remove that status
+                visitedQuestions.delete(currentQuestionIndex);
+            }
+            updateQuestionNumbers();
+        }
+
+        function submitQuiz(event) {
+            event.preventDefault();
+            
+            // Update modal content
+            document.getElementById('answeredCount').textContent = userAnswers.size;
+            document.getElementById('totalCount').textContent = questionsData.length;
+            document.getElementById('remainingTime').textContent = document.getElementById('timer').textContent;
+            
+            // Show modal instead of confirm
+            const submitModal = new bootstrap.Modal(document.getElementById('submitConfirmModal'));
+            submitModal.show();
+        }
+
+        function confirmSubmit() {
+            // Hide modal
+            const submitModal = bootstrap.Modal.getInstance(document.getElementById('submitConfirmModal'));
+            submitModal.hide();
+
+            clearInterval(timerInterval);
+            const submitButton = document.querySelector('button[type="submit"]');
+            if (submitButton) submitButton.disabled = true;
+
+            let correctCount = 0;
+            const subjectResults = {};
+
+            questionsData.forEach((question, index) => {
+                const questionCard = document.getElementById(`question-${index}`);
+                const selectedOption = userAnswers.get(index);
+                const correctAnswer = question.correct_answer;
+                
+                if (!subjectResults[question.subject]) {
+                    subjectResults[question.subject] = { correct: 0, total: 0 };
+                }
+                subjectResults[question.subject].total++;
+
+                const feedback = questionCard.querySelector('.feedback');
+                const explanation = questionCard.querySelector('.explanation');
+                
+                if (selectedOption !== undefined) {
+                    const isCorrect = selectedOption === correctAnswer;
+                    if (isCorrect) {
+                        correctCount++;
+                        subjectResults[question.subject].correct++;
+                    }
+
+                    feedback.style.display = 'block';
+                    feedback.className = `feedback alert ${isCorrect ? 'alert-success' : 'alert-danger'}`;
+                    feedback.textContent = isCorrect ? 'Correct!' : 'Incorrect';
+
+                    questionCard.querySelectorAll('.option-btn').forEach((btn, i) => {
+                        btn.classList.remove('selected');
+                        if (i === correctAnswer) {
+                            btn.classList.add('correct');
+                        } else if (i === selectedOption && !isCorrect) {
+                            btn.classList.add('incorrect');
+                        }
+                        btn.disabled = true;
+                    });
+                }
+
+                explanation.style.display = 'block';
+            });
+
+            const scorePercentage = (correctCount / questionsData.length) * 100;
+
+            const resultsHtml = `
+                <div class="card mt-4">
+                    <div class="card-body text-center">
+                        <h3>Test Results</h3>
+                        <p class="display-4 mb-0">${correctCount}/${questionsData.length} (${scorePercentage.toFixed(1)}%)</p>
+                        <div class="alert ${scorePercentage >= 70 ? 'alert-success' : 'alert-info'} mt-3">
+                            ${scorePercentage >= 70 ? 
+                                'Excellent! You\'ve demonstrated a strong understanding across multiple subjects.' :
+                                'Keep practicing! Focus on the subjects where you scored lower.'}
+                        </div>
+                        <div class="mt-4">
+                            <h4>Subject-wise Breakdown</h4>
+                            ${Object.entries(subjectResults).map(([subject, result]) => `
+                                <div class="subject-breakdown mt-3">
+                                    <h5>${subject}</h5>
+                                    <p class="mb-0">${result.correct}/${result.total} 
+                                       (${((result.correct / result.total) * 100).toFixed(1)}%)</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="mt-4">
+                            <a href="/" class="btn btn-primary btn-lg">Return to Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const resultsContainer = document.createElement('div');
+            resultsContainer.innerHTML = resultsHtml;
+            document.getElementById('questions-container').appendChild(resultsContainer);
+
+            // Disable all radio buttons
+            document.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.disabled = true;
+            });
+        }
+
+        // Add new function to handle multiple answer selections
+        function handleMultipleAnswer(questionIndex, optionIndex) {
+            const selectedOptions = new Set(tempSelectedOption.get(questionIndex) || []);
+            if (document.getElementById(`q${questionIndex}-opt${optionIndex}`).checked) {
+                selectedOptions.add(optionIndex);
+            } else {
+                selectedOptions.delete(optionIndex);
+            }
+            tempSelectedOption.set(questionIndex, Array.from(selectedOptions));
+        }
+
+        // Fetch questions when page loads
+        document.addEventListener('DOMContentLoaded', fetchQuestions);
+    </script>
+</body>
+</html> 

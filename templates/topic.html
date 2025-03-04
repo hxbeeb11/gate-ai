@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ topic }} - GATE AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .question-card {
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        .question-card:hover {
+            transform: translateY(-5px);
+        }
+        .option-btn {
+            width: 100%;
+            margin: 5px 0;
+            text-align: left;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+        .option-btn:hover {
+            transform: translateX(10px);
+        }
+        .feedback {
+            display: none;
+            margin-top: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .explanation {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #0d6efd;
+            border-radius: 4px;
+        }
+        .topic-header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .topic-title {
+            color: #0d6efd;
+            margin-bottom: 10px;
+        }
+        .subtopic-title {
+            color: #6c757d;
+            font-size: 1.25rem;
+            margin-bottom: 15px;
+        }
+        .question-number {
+            color: #0d6efd;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        .difficulty-badge {
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin-left: 10px;
+        }
+        .error-container {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .level-up-alert {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: slideIn 0.5s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">GATE AI</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Level Up Notification -->
+        <div class="level-up-alert alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Congratulations!</strong> You've advanced to a new difficulty level!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="topic-header">
+            {% set topic_parts = topic.split(' - ') %}
+            <h1 class="topic-title">
+                {{ topic_parts[0] }}
+                <span class="badge {% if difficulty_level == 'beginner' %}bg-success{% elif difficulty_level == 'intermediate' %}bg-warning{% else %}bg-danger{% endif %} difficulty-badge">
+                    {{ difficulty_level|title }}
+                </span>
+            </h1>
+        </div>
+
+        <div id="loading" class="loading-spinner" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Your questions are being prepared. Please wait...</p>
+        </div>
+
+        {% if error %}
+        <div class="error-container">
+            <h4>Error Generating Questions</h4>
+            <p>{{ error }}</p>
+            <div class="mt-3">
+                <button class="btn btn-primary" onclick="retryGeneration()">Try Again</button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Return to Dashboard</a>
+            </div>
+        </div>
+        {% elif questions %}
+            <form id="quiz-form" onsubmit="submitQuiz(event)">
+        {% for question in questions %}
+                <div class="card question-card" id="question-{{ loop.index0 }}">
+            <div class="card-body">
+                        <div class="question-number">Question {{ loop.index }}</div>
+                <p class="card-text">{{ question.question }}</p>
+                
+                <div class="options">
+                            {% set outer_loop = loop %}
+                    {% for option in question.options %}
+                            <div class="option-wrapper mb-2">
+                                <input type="radio" 
+                                       name="question-{{ outer_loop.index0 }}" 
+                                       id="question-{{ outer_loop.index0 }}-option-{{ loop.index0 }}"
+                                       value="{{ loop.index0 }}"
+                                       class="btn-check"
+                                       autocomplete="off"
+                                       data-correct="{{ 1 if loop.index0 == question.correct_answer else 0 }}">
+                                <label class="btn btn-outline-primary option-btn w-100" 
+                                       for="question-{{ outer_loop.index0 }}-option-{{ loop.index0 }}">
+                        {{ option }}
+                                </label>
+                            </div>
+                    {% endfor %}
+                </div>
+
+                        <div class="feedback alert d-none"></div>
+                        <div class="explanation" style="display: none;">
+                            <strong>Explanation:</strong> {{ question.explanation }}
+                        </div>
+            </div>
+        </div>
+        {% endfor %}
+
+                <div class="text-center mt-4 mb-4">
+                    <button type="submit" class="btn btn-primary btn-lg" id="submit-quiz">Submit Answers</button>
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary btn-lg ms-2">Return to Dashboard</a>
+                </div>
+            </form>
+
+            <div id="results-container" class="d-none">
+                <!-- Results will be inserted here -->
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Initialize questions data
+        const questions = {{ questions|tojson|safe if questions else '[]' }};
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if not questions and not error %}
+                document.getElementById('loading').style.display = 'block';
+            {% endif %}
+        });
+
+        function retryGeneration() {
+            document.getElementById('loading').style.display = 'block';
+            window.location.reload();
+        }
+
+        let startTime = Date.now();
+        let questionsAnswered = 0;
+        let totalCorrect = 0;
+
+        function submitQuiz(event) {
+            event.preventDefault();
+            
+            const form = document.getElementById('quiz-form');
+            const submitButton = document.getElementById('submit-quiz');
+            submitButton.disabled = true;
+            
+            // Disable all radio buttons
+            form.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.disabled = true;
+            });
+
+            let answers = [];
+            let correct = 0;
+            const totalQuestions = questions.length;
+
+            // Process each question
+            for (let i = 0; i < totalQuestions; i++) {
+                const questionCard = document.getElementById(`question-${i}`);
+                const selectedOption = form.querySelector(`input[name="question-${i}"]:checked`);
+                const correctAnswer = questions[i].correct_answer;
+                
+                if (!selectedOption) continue; // Skip if no answer selected
+                
+                const isCorrect = parseInt(selectedOption.value) === correctAnswer;
+                if (isCorrect) correct++;
+
+                // Show feedback and explanation
+                const feedback = questionCard.querySelector('.feedback');
+                const explanation = questionCard.querySelector('.explanation');
+                
+                feedback.classList.remove('d-none');
+                explanation.style.display = 'block';
+                
+                if (isCorrect) {
+                feedback.classList.add('alert-success');
+                feedback.textContent = 'Correct! Well done!';
+            } else {
+                feedback.classList.add('alert-danger');
+                    feedback.textContent = 'Incorrect. See explanation below.';
+                }
+
+                // Highlight correct and incorrect answers
+                questionCard.querySelectorAll('.option-btn').forEach((btn, index) => {
+                    if (index === correctAnswer) {
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-success');
+                    } else if (parseInt(selectedOption.value) === index) {
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-danger');
+                    }
+                });
+            }
+
+            // Calculate score and time taken
+            const score = correct / totalQuestions;
+            const timeTaken = (Date.now() - startTime) / 1000;
+
+            // Submit results to server
+            fetch('{{ url_for("submit_answer") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    subject: '{{ topic_parts[0] }}',  // Send only the subject name
+                    time_taken: timeTaken,
+                    total_correct: correct,
+                    num_questions: totalQuestions
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Show results
+                const resultsHtml = `
+                    <div class="card mt-4">
+                        <div class="card-body text-center">
+                            <h3>Test Results</h3>
+                            <p class="lead">Your Score: ${(score * 100).toFixed(1)}%</p>
+                            <p>Correct Answers: ${correct} out of ${totalQuestions}</p>
+                            <div class="alert ${score >= 0.7 ? 'alert-success' : 'alert-warning'} mt-3">
+                                ${data.message}
+                            </div>
+                            <div class="mt-3">
+                                <a href="{{ url_for('index') }}" class="btn btn-primary">Return to Dashboard</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const resultsContainer = document.getElementById('results-container');
+                resultsContainer.innerHTML = resultsHtml;
+                resultsContainer.classList.remove('d-none');
+
+                // Show level up notification if applicable
+                if (data.difficulty_changed) {
+                    const levelUpAlert = document.querySelector('.level-up-alert');
+                    levelUpAlert.style.display = 'block';
+                    levelUpAlert.querySelector('strong').textContent = 
+                        `Congratulations! You've advanced to ${data.new_difficulty} level!`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error submitting results. Please try again.');
+                submitButton.disabled = false;
+            });
+        }
+
+        function toggleLoading(show) {
+            const loadingSpinner = document.getElementById('loading');
+            loadingSpinner.style.display = show ? 'block' : 'none';
+        }
+
+        // Modify the start_topic function to show loading animation
+        async function startTopic(topic) {
+            toggleLoading(true); // Show loading animation
+            try {
+                const response = await fetch(`/start_topic/${topic}`);
+                const data = await response.json();
+                // Handle the response and render questions
+                // ... existing code ...
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error fetching questions. Please try again.');
+            } finally {
+                toggleLoading(false); // Hide loading animation
+            }
+        }
+    </script>
+</body>
+</html>

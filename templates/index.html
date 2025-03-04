@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GATE AI - Adaptive Learning</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .topic-card {
+            margin-bottom: 15px;
+            transition: transform 0.2s;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .progress-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .topic-subtitle {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        .key-points {
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        .key-points ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+        .subject-header {
+            color: #0d6efd;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .subject-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .score-badge {
+            margin-left: 10px;
+            font-size: 0.9rem;
+        }
+        .topic-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .start-button {
+            margin-top: 15px;
+        }
+        .subject-progress {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .subject-progress:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .difficulty-badge {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+        }
+        
+        .difficulty-badge.changed {
+            animation: levelUp 1s ease;
+        }
+        
+        .topics-list {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .subject-progress.expanded .topics-list {
+            max-height: 500px;
+            transition: max-height 0.5s ease-in;
+        }
+        
+        .topic-item {
+            padding: 12px;
+            border-left: 3px solid #e9ecef;
+            margin: 8px 0;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .topic-item:hover {
+            border-left-color: #0d6efd;
+            background: #f8f9fa;
+        }
+        
+        .topic-item .score {
+            font-weight: 500;
+            color: #0d6efd;
+        }
+        
+        .topic-item .progress {
+            background-color: #e9ecef;
+        }
+        
+        @keyframes levelUp {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .expand-button {
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.3s;
+            align-self: flex-start;
+        }
+        
+        .expand-button.rotated {
+            transform: rotate(180deg);
+        }
+        
+        .card-title {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        
+        .btn-primary {
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+        .performance-graph {
+            width: 100%;
+            height: 200px !important;
+            margin-bottom: 10px;
+        }
+        .no-data-message {
+            text-align: center;
+            color: #6c757d;
+            padding: 8px;
+            font-style: italic;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">GATE AI</a>
+            <div class="navbar-nav ms-auto">
+                <a href="{{ url_for('logout') }}" class="btn btn-light">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Progress Section -->
+            <div class="col-md-4">
+                <div class="progress-section">
+                    <h3>Subject Progress</h3>
+                    
+                    {% for topic_data in topics_data.topics %}
+                    <div class="subject-progress" id="subject-{{ loop.index }}">
+                        <div class="subject-header">
+                            <div class="subject-title-row">
+                                <h5 class="mb-0">{{ topic_data.title }}</h5>
+                                {% set subject_progress = progress.subjects.get(topic_data.title, {}) %}
+                                {% set difficulty = subject_progress.get('difficulty_level', 'beginner') %}
+                                <span class="badge {% if difficulty == 'beginner' %}bg-success{% elif difficulty == 'intermediate' %}bg-warning{% else %}bg-danger{% endif %} difficulty-badge">
+                                    {{ difficulty|title }}
+                                </span>
+                                
+                                {% set score = subject_progress.get('score', 0) %}
+                                {% if score > 0 %}
+                                    <span class="badge bg-info score-badge">Score: {{ (score * 100)|round }}%</span>
+                                {% else %}
+                                    <span class="badge bg-secondary score-badge">Not Started</span>
+                                {% endif %}
+                            </div>
+                            <button class="expand-button" onclick="toggleTopics('subject-{{ loop.index }}')">
+                                ▼
+                            </button>
+                        </div>
+                        
+                        {% if subject_progress.get('score', 0) > 0 and not subject_progress.get('mastered', False) %}
+                        <div class="progress mt-2" style="height: 5px;">
+                            <div class="progress-bar {% if subject_progress.get('difficulty_level') == 'intermediate' %}bg-warning{% elif subject_progress.get('difficulty_level') == 'advanced' %}bg-danger{% endif %}" 
+                                 role="progressbar" 
+                                 style="width: {{ (subject_progress.get('score', 0) / 0.7 * 100)|round }}%"
+                                 title="Progress in {{ subject_progress.get('difficulty_level', 'beginner') }} level: {{ (subject_progress.get('score', 0) / 0.7 * 100)|round }}%"></div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="topics-list">
+                            {% for subtopic in topic_data.subtopics %}
+                            <div class="topic-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>{{ subtopic.title }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                        {% endfor %}
+                </div>
+            </div>
+
+            <!-- Learning Path -->
+            <div class="col-md-8">
+                <h2>Recommended Learning Path</h2>
+                
+                {% set current_subject = None %}
+                {% for topic in learning_path %}
+                    {% set topic_parts = topic.topic.split(' - ') %}
+                    
+                    {% if topic_parts[0] != current_subject %}
+                        {% if not loop.first %}</div>{% endif %}
+                        <h3 class="subject-header">{{ topic_parts[0] }}</h3>
+                        <div class="subject-topics">
+                        {% set current_subject = topic_parts[0] %}
+                    {% endif %}
+                    
+                <div class="card topic-card">
+                    <div class="card-body">
+                        <div class="topic-content">
+                            <!-- Performance Graph or Message -->
+                            {% set subject_progress = progress.subjects.get(topic_parts[0], {}) %}
+                            {% if subject_progress.history and subject_progress.history|length > 0 %}
+                                <canvas class="performance-graph" id="graph-{{ loop.index }}"></canvas>
+                            {% else %}
+                                <div class="no-data-message">
+                                    Start learning to get your performance analysis
+                                </div>
+                            {% endif %}
+
+                            <!-- Current Progress -->
+                            {% if subject_progress.score > 0 %}
+                            <div class="progress mt-2 mb-3" style="height: 5px;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: {{ (subject_progress.score * 100)|round }}%"
+                                     title="Current Progress: {{ (subject_progress.score * 100)|round }}%">
+                                </div>
+                            </div>
+                            {% endif %}
+
+                        <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ url_for('start_topic', topic=topic.topic) }}" 
+                                   class="btn btn-primary"
+                                   onclick="showLoading(event, this)">Start Learning</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    
+                {% if loop.last %}</div>{% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Add this before the closing </div> of the main container -->
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>Ready for a Challenge?</h3>
+                        <p class="mb-4">Test your knowledge across all subjects with our comprehensive mock test.</p>
+                        <a href="{{ url_for('mock_test') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-pencil-alt me-2"></i>Start Mock Test
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleTopics(subjectId) {
+            const subject = document.getElementById(subjectId);
+            const button = subject.querySelector('.expand-button');
+            subject.classList.toggle('expanded');
+            button.classList.toggle('rotated');
+        }
+        
+        // Function to animate difficulty level change
+        function animateDifficultyChange(element) {
+            element.classList.add('changed');
+            setTimeout(() => {
+                element.classList.remove('changed');
+            }, 1000);
+        }
+        
+        // Check for difficulty level changes
+        document.addEventListener('DOMContentLoaded', () => {
+            const difficultyBadges = document.querySelectorAll('.difficulty-badge');
+            difficultyBadges.forEach(badge => {
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                            animateDifficultyChange(badge);
+                        }
+                    });
+                });
+                observer.observe(badge, { attributes: true });
+            });
+        });
+
+        // Initialize performance graphs
+        document.addEventListener('DOMContentLoaded', () => {
+            {% for topic in learning_path %}
+                {% set topic_parts = topic.topic.split(' - ') %}
+                {% set subject_progress = progress.subjects.get(topic_parts[0], {}) %}
+                {% if subject_progress.history and subject_progress.history|length > 0 %}
+                    const ctx{{ loop.index }} = document.getElementById('graph-{{ loop.index }}').getContext('2d');
+                    new Chart(ctx{{ loop.index }}, {
+                        type: 'line',
+                        data: {
+                            labels: {{ subject_progress.history|map(attribute='attempt_number')|list|tojson }},
+                            datasets: [{
+                                label: 'Test Scores',
+                                data: {{ subject_progress.history|map(attribute='score')|list|tojson }},
+                                borderColor: '#0d6efd',
+                                tension: 0.1,
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value + '%';
+                                        },
+                                        font: {
+                                            size: 10
+                                        }
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                },
+                                x: {
+                                    ticks: {
+                                        font: {
+                                            size: 10
+                                        }
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `Score: ${context.parsed.y}%`;
+                                        }
+                                    }
+                                }
+                            },
+                            layout: {
+                                padding: {
+                                    left: 5,
+                                    right: 5,
+                                    top: 5,
+                                    bottom: 5
+                                }
+                            }
+                        }
+                    });
+                {% endif %}
+            {% endfor %}
+        });
+
+        function showLoading(event, button) {
+            event.preventDefault();
+            const href = button.getAttribute('href');
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Preparing Questions...';
+            window.location.href = href;
+        }
+    </script>
+</body>
+</html>

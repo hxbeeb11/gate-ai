@@ -1,0 +1,280 @@
+{
+  "topics": [
+    {
+      "title": "Engineering Mathematics",
+      "subtopics": [
+        {
+          "title": "Discrete Mathematics",
+          "key_points": [
+            "Set Theory",
+            "Relations and Functions",
+            "Propositional and First-Order Logic",
+            "Groups, Rings, and Fields",
+            "Graph Theory",
+            "Combinatorics",
+            "Recurrence Relations"
+          ]
+        },
+        {
+          "title": "Linear Algebra",
+          "key_points": [
+            "Vector Spaces",
+            "Matrices and Determinants",
+            "Eigenvalues and Eigenvectors",
+            "Rank and Nullity"
+          ]
+        },
+        {
+          "title": "Calculus",
+          "key_points": [
+            "Limits and Continuity",
+            "Differentiation and Integration",
+            "Partial Derivatives",
+            "Maxima and Minima"
+          ]
+        },
+        {
+          "title": "Probability and Statistics",
+          "key_points": [
+            "Probability Distributions (Binomial, Poisson, Normal)",
+            "Bayes' Theorem",
+            "Hypothesis Testing",
+            "Sampling and Estimation"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Digital Logic",
+      "subtopics": [
+        {
+          "title": "Boolean Algebra and Logic Gates",
+          "key_points": [
+            "Basic operations: AND, OR, NOT",
+            "Truth tables",
+            "Logic gate symbols",
+            "Simplification techniques"
+          ]
+        },
+        {
+          "title": "Karnaugh Maps & Simplification",
+          "key_points": [
+            "Minimization techniques",
+            "Grouping techniques",
+            "Applications in circuit design"
+          ]
+        },
+        {
+          "title": "Combinational Circuits (Multiplexers, Encoders, Decoders)",
+          "key_points": [
+            "Design and analysis",
+            "Applications in digital systems"
+          ]
+        },
+        {
+          "title": "Sequential Circuits (Flip-Flops, Counters, Registers)",
+          "key_points": [
+            "Timing diagrams",
+            "State machines"
+          ]
+        },
+        {
+          "title": "Number Systems and Arithmetic",
+          "key_points": [
+            "Binary, Octal, Hexadecimal",
+            "Arithmetic operations",
+            "Conversion techniques"
+          ]
+        },
+        {
+          "title": "Finite State Machines (FSM)",
+          "key_points": [
+            "State diagrams",
+            "Mealy vs. Moore machines",
+            "Applications in control systems"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Computer Networks",
+      "subtopics": [
+        {
+          "title": "Network Models (OSI and TCP IP)",
+          "key_points": [
+            "OSI and TCP/IP models",
+            "Layer functionalities",
+            "Protocol interactions"
+          ]
+        },
+        {
+          "title": "IPv4 and IPv6 Addressing",
+          "key_points": [
+            "Address structure",
+            "Subnetting",
+            "Address resolution"
+          ]
+        },
+        {
+          "title": "Network Protocols (ARP, ICMP, DHCP, DNS, TCP vs. UDP, HTTP, FTP, SMTP)",
+          "key_points": [
+            "Protocol functionalities",
+            "Layer interactions",
+            "Common use cases"
+          ]
+        },
+        {
+          "title": "Routing & Switching (Dijkstra, Bellman-Ford, MAC, VLANs)",
+          "key_points": [
+            "Routing algorithms",
+            "Switching techniques",
+            "Network segmentation"
+          ]
+        },
+        {
+          "title": "Network Security (Firewalls, Cryptography, Digital Signatures, SSL/TLS)",
+          "key_points": [
+            "Security principles",
+            "Common threats",
+            "Mitigation strategies"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Machine Learning",
+      "subtopics": [
+        {
+          "title": "Supervised Learning",
+          "key_points": [
+            "Linear Regression",
+            "Logistic Regression",
+            "Decision Trees",
+            "Random Forests",
+            "Support Vector Machines (SVM)",
+            "Neural Networks"
+          ]
+        },
+        {
+          "title": "Unsupervised Learning",
+          "key_points": [
+            "Clustering techniques",
+            "Dimensionality reduction",
+            "Anomaly detection"
+          ]
+        },
+        {
+          "title": "Reinforcement Learning",
+          "key_points": [
+            "Markov Decision Processes",
+            "Q-Learning",
+            "Policy gradients"
+          ]
+        },
+        {
+          "title": "Deep Learning",
+          "key_points": [
+            "Convolutional Neural Networks (CNNs)",
+            "Recurrent Neural Networks (RNNs)",
+            "Transfer learning"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Software Engineering",
+      "subtopics": [
+        {
+          "title": "Software Development Life Cycle (SDLC)",
+          "key_points": [
+            "Phases of SDLC",
+            "Agile vs. Waterfall",
+            "Documentation practices"
+          ]
+        },
+        {
+          "title": "Agile & DevOps Principles",
+          "key_points": [
+            "Agile methodologies",
+            "Continuous integration/continuous deployment (CI/CD)",
+            "Collaboration tools"
+          ]
+        },
+        {
+          "title": "Software Testing (Unit, Integration, System, Acceptance)",
+          "key_points": [
+            "Types of testing",
+            "Test-driven development (TDD)",
+            "Automation tools"
+          ]
+        },
+        {
+          "title": "Software Design Patterns (Singleton, Factory, MVC, Observer)",
+          "key_points": [
+            "Common design patterns",
+            "Benefits of design patterns",
+            "Real-world applications"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Cloud Computing & Big Data",
+      "subtopics": [
+        {
+          "title": "Cloud Models (IaaS, PaaS, SaaS)",
+          "key_points": [
+            "Definitions",
+            "Benefits of cloud computing",
+            "Service models comparison"
+          ]
+        },
+        {
+          "title": "Virtualization & Containers (Docker, Kubernetes)",
+          "key_points": [
+            "Virtual machines vs. containers",
+            "Docker basics",
+            "Kubernetes orchestration"
+          ]
+        },
+        {
+          "title": "Big Data Processing (Hadoop, Spark, MapReduce)",
+          "key_points": [
+            "Hadoop ecosystem",
+            "Spark framework",
+            "Data processing techniques"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Cybersecurity",
+      "subtopics": [
+        {
+          "title": "Cryptography (AES, RSA, SHA)",
+          "key_points": [
+            "Symmetric vs. asymmetric encryption",
+            "Hash functions",
+            "Digital signatures"
+          ]
+        },
+        {
+          "title": "Ethical Hacking & Penetration Testing",
+          "key_points": [
+            "Phases of penetration testing",
+            "Tools and techniques",
+            "Legal considerations"
+          ]
+        },
+        {
+          "title": "Web Security (OWASP Top 10, SQL Injection, XSS)",
+          "key_points": [
+            "Common vulnerabilities",
+            "Prevention techniques",
+            "Security best practices"
+          ]
+        }
+      ]
+    }
+  ]
+} 
