@@ -13,7 +13,8 @@ def clean_duplicates():
         'Software Engineering',
         'Cloud Computing',
         'Cybersecurity',
-        'Aptitude and Reasoning'
+        'Aptitude and Reasoning',
+        'Deep Learning'
     ]
     
     for subject in subjects:

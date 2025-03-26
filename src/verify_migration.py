@@ -18,7 +18,8 @@ def verify_migration():
         'Software Engineering',
         'Cloud Computing',
         'Cybersecurity',
-        'Aptitude and Reasoning'
+        'Aptitude and Reasoning',
+        'Deep Learning'
     ]
     
     print("\nBreakdown by subject:")

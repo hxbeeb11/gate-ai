@@ -10,6 +10,9 @@ from database import db
 import time
 import random
 
+# Get the absolute path of the project root directory (one level up from src)
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 class GATEDataset(Dataset):
     def __init__(self, texts, labels, tokenizer, max_length=512):
         self.texts = texts
@@ -55,8 +58,19 @@ def prepare_data():
         print(f"Warning: Could not load questions from database: {str(e)}")
         questions_data = []
 
+    # Extract subjects from database questions
+    subjects_in_db = set()
+    for question in questions_data:
+        if isinstance(question, dict) and 'subject' in question:
+            subjects_in_db.add(question['subject'])
+    
+    print(f"Found {len(subjects_in_db)} unique subjects in database:")
+    for subject in subjects_in_db:
+        print(f"- {subject}")
+
     # Load topics data
-    with open('data/raw/topics.json', 'r', encoding='utf-8') as f:
+    topics_path = os.path.join(project_root, 'data', 'raw', 'topics.json')
+    with open(topics_path, 'r', encoding='utf-8') as f:
         topics_data = json.load(f)
 
     texts = []
@@ -64,22 +78,23 @@ def prepare_data():
     label_map = {}
     current_label = 0
 
-    # Process topics first
+    # Process topics first, but only those found in the database
     for topic in topics_data['topics']:
-        if topic['title'] not in label_map:
-            label_map[topic['title']] = current_label
-            current_label += 1
+        if topic['title'] in subjects_in_db:
+            if topic['title'] not in label_map:
+                label_map[topic['title']] = current_label
+                current_label += 1
 
-        # Add topic content
-        for subtopic in topic['subtopics']:
-            key_points_text = '. '.join(subtopic['key_points'])
-            full_text = f"{subtopic['title']}. {key_points_text}"
-            texts.append(full_text)
-            labels.append(label_map[topic['title']])
+            # Add topic content
+            for subtopic in topic['subtopics']:
+                key_points_text = '. '.join(subtopic['key_points'])
+                full_text = f"{subtopic['title']}. {key_points_text}"
+                texts.append(full_text)
+                labels.append(label_map[topic['title']])
 
     # Process questions from database
     for question in questions_data:
-        subject = question['subject']
+        subject = question.get('subject')
         if subject not in label_map:
             continue
         
@@ -207,9 +222,70 @@ def train_bert_model(model, train_loader, val_loader, device, num_epochs=3):
     print(f"Best validation accuracy: {best_accuracy:.4f}")
     return best_accuracy
 
+def generate_labels_json(label_map):
+    """
+    Generate labels.json based on subjects present in the mock_questions table.
+    """
+    print("\nGenerating labels.json from model training results...")
+    
+    # Get subjects that were found in the database (from label_map)
+    subjects_in_db = set(label_map.keys())
+    print(f"Found {len(subjects_in_db)} subjects with questions in the database:")
+    for subject in subjects_in_db:
+        print(f"- {subject}")
+    
+    # Load topics.json
+    topics_path = os.path.join(project_root, 'data', 'raw', 'topics.json')
+    with open(topics_path, 'r', encoding='utf-8') as f:
+        topics_data = json.load(f)
+    
+    # Create filtered version with only subjects in database
+    filtered_topics = {"topics": []}
+    
+    # Track statistics for reporting
+    total_subtopics = 0
+    total_key_points = 0
+    
+    for topic in topics_data.get('topics', []):
+        if topic['title'] in subjects_in_db:
+            # Add the entire topic structure (with all subtopics and key points)
+            filtered_topics['topics'].append(topic)
+            
+            # Count subtopics and key points for reporting
+            subtopics_count = len(topic.get('subtopics', []))
+            total_subtopics += subtopics_count
+            
+            key_points_count = sum(len(subtopic.get('key_points', [])) 
+                                  for subtopic in topic.get('subtopics', []))
+            total_key_points += key_points_count
+            
+            print(f"\n{topic['title']}:")
+            print(f"  - {subtopics_count} subtopics")
+            print(f"  - {key_points_count} key points")
+            
+            # Print some sample subtopics
+            for i, subtopic in enumerate(topic.get('subtopics', [])[:3]):  # Show first 3
+                print(f"  - Subtopic: {subtopic['title']}")
+                if i == 2 and len(topic.get('subtopics', [])) > 3:
+                    print(f"  - ... and {len(topic.get('subtopics', [])) - 3} more subtopics")
+    
+    # Save as labels.json
+    labels_path = os.path.join(project_root, 'models', 'labels.json')
+    os.makedirs(os.path.dirname(labels_path), exist_ok=True)
+    
+    with open(labels_path, 'w', encoding='utf-8') as f:
+        json.dump(filtered_topics, f, indent=2)
+    
+    print(f"\nGenerated labels.json with:")
+    print(f"- {len(filtered_topics['topics'])} subjects")
+    print(f"- {total_subtopics} subtopics")
+    print(f"- {total_key_points} key points")
+    print("This file contains the complete subject taxonomy learned by the model")
+    return filtered_topics
+
 def main():
     print("=" * 60)
-    print("GATE INSIGHT - BERT Model Training")
+    print("GATE AI - BERT Model Training")
     print("=" * 60)
     print("\nInitializing training environment...")
     
@@ -248,18 +324,25 @@ def main():
     print("\nPreparing datasets...")
     train_dataset = GATEDataset(train_texts, train_labels, tokenizer)
     val_dataset = GATEDataset(val_texts, val_labels, tokenizer)
-    print(f"Training examples: {len(train_dataset)}")
-    print(f"Validation examples: {len(val_dataset)}")
 
     # Create data loaders
     train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=8)
 
-    # Train model
-    train_bert_model(model, train_loader, val_loader, device)
+    print(f"Training set: {len(train_dataset)} examples")
+    print(f"Validation set: {len(val_dataset)} examples")
 
-    print("\nModel training pipeline completed successfully!")
-    print("You can now use the fine-tuned model for question classification.")
+    # Train model
+    best_accuracy = train_bert_model(model, train_loader, val_loader, device, num_epochs=3)
+    
+    # Generate labels.json based on subjects in database
+    generate_labels_json(label_map)
+    
+    print("\nModel training and label generation complete!")
+    print(f"Model saved to: models/fine_tuned_bert")
+    print(f"Label map saved to: models/label_map.json")
+    print(f"Subject taxonomy saved to: models/labels.json")
+    print(f"Best validation accuracy: {best_accuracy:.4f}")
 
 if __name__ == "__main__":
     main() 

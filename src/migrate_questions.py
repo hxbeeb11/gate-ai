@@ -4,7 +4,7 @@ import os
 from database import db
 
 def migrate_questions():
-    processed_dir = 'data/processed'
+    processed_dir = 'data/processed/mock'
     subjects = {
         'mock_engineering_maths.json': 'Engineering Mathematics',
         'mock_digital_logic.json': 'Digital Logic',
@@ -13,7 +13,8 @@ def migrate_questions():
         'mock_software_engineering.json': 'Software Engineering',
         'mock_cloud_computing.json': 'Cloud Computing',
         'mock_cybersecurity.json': 'Cybersecurity',
-        'mock_aptitude_and_reasoning.json': 'Aptitude and Reasoning'
+        'mock_aptitude_and_reasoning.json': 'Aptitude and Reasoning',
+        'mock_deep_learning.json': 'Deep Learning'
     }
 
     for filename, subject in subjects.items():

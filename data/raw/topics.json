@@ -219,7 +219,7 @@
       ]
     },
     {
-      "title": "Cloud Computing & Big Data",
+      "title": "Cloud Computing",
       "subtopics": [
         {
           "title": "Cloud Models (IaaS, PaaS, SaaS)",
@@ -251,27 +251,156 @@
       "title": "Cybersecurity",
       "subtopics": [
         {
-          "title": "Cryptography (AES, RSA, SHA)",
+          "title": "Cryptography",
           "key_points": [
-            "Symmetric vs. asymmetric encryption",
-            "Hash functions",
-            "Digital signatures"
+            "Symmetric and Asymmetric Encryption",
+            "Hash Functions and Digital Signatures",
+            "Public Key Infrastructure (PKI)",
+            "Common Encryption Algorithms (AES, RSA, DES)",
+            "Key Management and Distribution"
           ]
         },
         {
-          "title": "Ethical Hacking & Penetration Testing",
+          "title": "Network Security",
           "key_points": [
-            "Phases of penetration testing",
-            "Tools and techniques",
-            "Legal considerations"
+            "Firewalls and IDS/IPS",
+            "VPN and Network Access Control",
+            "Common Network Attacks",
+            "Security Protocols (SSL/TLS, IPSec)",
+            "Network Security Architecture"
           ]
         },
         {
-          "title": "Web Security (OWASP Top 10, SQL Injection, XSS)",
+          "title": "Application Security",
           "key_points": [
-            "Common vulnerabilities",
-            "Prevention techniques",
-            "Security best practices"
+            "Web Application Security",
+            "OWASP Top 10 Vulnerabilities",
+            "Secure Coding Practices",
+            "Input Validation and Sanitization",
+            "Authentication and Authorization"
+          ]
+        },
+        {
+          "title": "System Security",
+          "key_points": [
+            "Operating System Security",
+            "Access Control Models",
+            "Malware Types and Prevention",
+            "System Hardening",
+            "Security Policies and Procedures"
+          ]
+        },
+        {
+          "title": "Security Management",
+          "key_points": [
+            "Risk Assessment and Management",
+            "Security Auditing",
+            "Incident Response",
+            "Business Continuity Planning",
+            "Compliance and Regulations"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Deep Learning",
+      "subtopics": [
+        {
+          "title": "Introduction to Deep Learning",
+          "key_points": [
+            "Definition and history of deep learning",
+            "Difference between machine learning and deep learning",
+            "Applications of deep learning"
+          ]
+        },
+        {
+          "title": "Mathematical Foundations",
+          "key_points": [
+            "Linear algebra for deep learning",
+            "Probability and statistics",
+            "Optimization techniques",
+            "Gradient-based learning"
+          ]
+        },
+        {
+          "title": "Neural Networks Basics",
+          "key_points": [
+            "Structure of artificial neural networks",
+            "Activation functions (ReLU, Sigmoid, Tanh)",
+            "Forward and backward propagation",
+            "Loss functions and optimization"
+          ]
+        },
+        {
+          "title": "Deep Neural Networks (DNN)",
+          "key_points": [
+            "Multi-layer perceptrons (MLP)",
+            "Vanishing and exploding gradient problem",
+            "Batch normalization",
+            "Dropout regularization"
+          ]
+        },
+        {
+          "title": "Convolutional Neural Networks (CNN)",
+          "key_points": [
+            "Convolutional layers and feature maps",
+            "Pooling layers (Max pooling, Average pooling)",
+            "CNN architectures (LeNet, AlexNet, VGG, ResNet)",
+            "Transfer learning and fine-tuning"
+          ]
+        },
+        {
+          "title": "Recurrent Neural Networks (RNN)",
+          "key_points": [
+            "Sequence modeling and applications",
+            "Vanishing gradient problem in RNNs",
+            "Long Short-Term Memory (LSTM) networks",
+            "Gated Recurrent Units (GRU)"
+          ]
+        },
+        {
+          "title": "Advanced Architectures",
+          "key_points": [
+            "Transformers and Self-Attention",
+            "BERT and GPT models",
+            "Autoencoders and Variational Autoencoders (VAE)",
+            "Generative Adversarial Networks (GANs)"
+          ]
+        },
+        {
+          "title": "Optimization Techniques",
+          "key_points": [
+            "Gradient Descent and its variants (SGD, Adam, RMSprop)",
+            "Hyperparameter tuning",
+            "Learning rate schedules",
+            "Weight initialization strategies"
+          ]
+        },
+        {
+          "title": "Deep Learning Frameworks",
+          "key_points": [
+            "TensorFlow basics and architecture",
+            "PyTorch fundamentals",
+            "Keras API and model building",
+            "Comparison of deep learning frameworks"
+          ]
+        },
+        {
+          "title": "AutoML and Neural Architecture Search (NAS)",
+          "key_points": [
+            "Introduction to AutoML",
+            "Hyperparameter optimization",
+            "Neural architecture search",
+            "Evolutionary algorithms for deep learning"
+          ]
+        },
+        {
+          "title": "Practical Considerations",
+          "key_points": [
+            "Data preprocessing and augmentation",
+            "Handling imbalanced datasets",
+            "GPU acceleration and model deployment",
+            "Ethical considerations in deep learning"
           ]
         }
       ]

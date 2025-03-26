@@ -188,6 +188,20 @@
             color: white;
             border-color: #0d6efd;
         }
+        .diagram-container {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+            overflow: auto;
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
+        .diagram-container svg {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 <body>
@@ -314,7 +328,39 @@
         let timerInterval;
 
         function createQuestionHtml(question, index) {
-            if (question.type === 'numerical') {
+            if (question.type === 'diagram_question') {
+                return `
+                    <div class="question-card" id="question-${index}" style="display: ${index === 0 ? 'block' : 'none'}">
+                        <div class="subject-tag">${question.subject}</div>
+                        <div class="question-type-badge badge bg-secondary mb-2">Diagram Question</div>
+                        <h5 class="mb-3">Question ${index + 1}</h5>
+                        <p class="mb-4">${question.question}</p>
+                        
+                        <div class="diagram-container">
+                            ${question.svg_code}
+                        </div>
+                        
+                        <div class="options">
+                            ${question.options.map((option, i) => `
+                                <div class="option-wrapper">
+                                    <button type="button" 
+                                            class="option-btn"
+                                            onclick="highlightOption(${index}, ${i})"
+                                            id="q${index}-opt${i}">
+                                        ${option}
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="question-actions">
+                            <button class="btn btn-success" onclick="selectAndNext(${index})">Select & Next</button>
+                            <button class="btn bg-purple" onclick="markForReview()">Mark for Review</button>
+                        </div>
+                        <div class="feedback"></div>
+                        <div class="explanation">${question.explanation}</div>
+                    </div>
+                `;
+            } else if (question.type === 'numerical') {
                 return `
                     <div class="question-card" id="question-${index}" style="display: ${index === 0 ? 'block' : 'none'}">
                         <div class="subject-tag">${question.subject}</div>

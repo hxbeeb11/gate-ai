@@ -1,0 +1,197 @@
+# GATE AI Project Documentation Structure
+
+## 1. Project Overview
+
+### Purpose and Goals
+The GATE AI system is designed to provide adaptive learning for GATE examination preparation through intelligent question generation and personalized learning paths. The project aims to simulate the real GATE exam experience while adapting to individual student knowledge levels.
+
+### Key Features and Capabilities
+The system offers adaptive learning progression across multiple subjects, generates questions at varying difficulty levels (beginner to advanced), provides comprehensive progress tracking, and creates realistic mock tests with diverse question types including interactive diagrams.
+
+### Target Audience and Use Cases
+Primary audience includes GATE examination candidates, educational institutions offering GATE preparation, and self-learners in computer science and engineering disciplines. Use cases span from regular practice sessions to comprehensive mock tests and personalized learning.
+
+## 2. System Architecture
+
+### High-Level Architecture Diagram
+The architecture follows a web-based client-server model with Flask backend, database integration via Supabase, and AI components including BERT model and Together AI's LLM integration. The system maintains separation between data processing, AI models, and presentation layers.
+
+### Component Interaction Flow
+User requests trigger question generation or retrieval; the system processes these through the adaptive state manager, question generator, and progress tracker before returning responses. Backend components communicate with the database for persistent storage of questions and user progress.
+
+### Technology Stack and Dependencies
+Built on Python with Flask for the web framework, BERT for classification, Together AI's Llama-based model for question generation, and Supabase for database management. Additional dependencies include PyTorch for model training and various data processing libraries.
+
+## 3. Data Processing Pipeline
+
+### Data Collection and Sources
+Initial questions are sourced from curated educational content across multiple GATE subjects. Raw data is stored in JSON format in the data/raw directory, with a structured topics.json file defining subject hierarchies and key points for each topic.
+
+### Database Schema and Organization
+The database utilizes tables for mock_questions, diagram_questions, user_progress, and adaptive_state. Each question record contains fields for subject, question_type, options, correct_answer, and explanation with possible additional metadata.
+
+### Question Format and Structure
+Questions follow a consistent JSON structure across the system, with fields for question text, options array, correct_answer index, explanation text, and subject/topic tags. Diagram questions include additional SVG code fields for visual representations.
+
+## 4. BERT Model Implementation
+
+### Training Data Preparation
+The GATEDataset class in train_bert.py transforms existing questions into tokenized inputs suitable for BERT. The prepare_data() function handles loading, cleaning, and organizing training data from various subjects before splitting into training and validation sets.
+
+### Model Configuration and Parameters
+The project utilizes a pre-trained BERT model (bert-base-uncased) fine-tuned for question classification. Key parameters include a maximum sequence length of 512, learning rate optimization, and weighted loss functions to handle subject imbalance.
+
+### Training Process and Optimization
+Training involves multiple epochs with batch processing, gradient accumulation, and evaluation after each epoch. The train_bert_model() function implements early stopping based on validation accuracy and saves the best model checkpoint for future use.
+
+### Classification Mechanism
+The BERT model classifies questions based on learned patterns of language, structure, and content specific to each subject. It analyzes question text and extracts features that distinguish questions across different subjects and difficulty levels.
+
+### Output Labels and Pattern Recognition
+After training, the model generates labels.json with identified patterns and label_map.json mapping subjects to recognized patterns. These files are crucial for the question generator to maintain subject-specific question characteristics.
+
+### Performance Metrics and Evaluation
+The system tracks accuracy, precision, recall, and F1 scores during training. The evaluation process ensures the model reaches sufficient accuracy before deployment, with continuous monitoring for potential drift in classification performance.
+
+## 5. Pattern Recognition System
+
+### Subject-wise Pattern Identification
+The BERT model identifies distinct linguistic patterns, terminology usage, question structures, and complexity indicators for each subject area. These patterns reflect the unique characteristics of questions in domains like Digital Logic, Computer Networks, etc.
+
+### Label Generation and Mapping
+The generate_labels_json() function creates structured representations of identified patterns, with label_map.json establishing connections between subjects and their characteristic question patterns. This mapping drives the question generation process.
+
+### Pattern Storage and Retrieval
+Patterns are stored in standardized JSON format for efficient retrieval during question generation. The system loads these patterns when initializing the question generator, ensuring new questions reflect subject-specific characteristics.
+
+### Pattern Evolution and Refinement
+The system supports periodic retraining of the BERT model as new questions are added to the database, allowing pattern recognition to evolve and improve with expanding data. Pattern refinement helps maintain question quality and relevance.
+
+## 6. Question Generation Engine
+
+### LLM Integration (Together AI)
+The question_generator.py module connects to Together AI's API to access the Llama-3.3-70B-Instruct-Turbo-Free model, providing sophisticated natural language generation capabilities for creating contextually relevant questions.
+
+### Prompt Engineering Techniques
+Carefully crafted prompts in the _create_prompt() method guide the LLM to generate questions matching specific requirements. Prompts include subject context, key points, difficulty guidelines, and structural requirements to produce consistent outputs.
+
+### Question Template Design
+The system uses structured JSON templates for question generation, ensuring all required fields are included and properly formatted. Templates vary based on question type (multiple-choice, numerical, diagram) while maintaining consistency in core fields.
+
+### Difficulty Level Calibration
+Question complexity is calibrated using detailed difficulty guidelines (beginner, intermediate, advanced) embedded in prompts to the LLM. These guidelines specify conceptual depth, application requirements, and complexity factors appropriate for each level.
+
+### Quality Assurance Mechanisms
+Generated questions undergo validation checks for format compliance, content relevance, and difficulty alignment. Error handling mechanisms in the generate_questions_for_topic() function ensure only valid questions are presented to users.
+
+## 7. Adaptive Learning Implementation
+
+### User Progress Tracking
+The system maintains detailed records of user interactions, correct/incorrect answers, and completion rates for each subject and difficulty level. Progress data is stored in the database for persistence across sessions.
+
+### Difficulty Progression Algorithm
+Users advance from beginner to intermediate to advanced levels based on performance thresholds (typically 70% correct answers). The adaptive system adjusts question difficulty appropriately to match user knowledge and learning progression.
+
+### Personalized Learning Path Generation
+Based on progress data, the system recommends topics for further study, prioritizing areas of weakness while ensuring comprehensive coverage of the syllabus. Learning paths adapt dynamically as users demonstrate mastery of concepts.
+
+### Performance Analytics and Visualization
+The dashboard presents visual representations of subject-wise progress, difficulty progression, and comparative performance metrics. These visualizations help users identify strengths and areas needing improvement at a glance.
+
+## 8. Diagram Question System
+
+### SVG Diagram Generation
+Diagram questions utilize SVG code embedded in JSON structures to render interactive visual elements. The diagrams are designed to be spacious, clear, and illustrate key concepts from subjects like Digital Logic, Computer Networks, and Cloud Computing.
+
+### Interactive Diagram Components
+SVG diagrams include proper labeling, color-coding, and clear visual organization to effectively communicate technical concepts. The system ensures diagrams render consistently across different browsers and screen sizes.
+
+### Diagram Question Types and Categories
+The project includes diverse diagram types such as circuit diagrams for Digital Logic, network topologies for Computer Networks, architectural diagrams for Cloud Computing, and algorithm visualizations for Machine Learning.
+
+### Integration with Main Question Engine
+Diagram questions are fetched from the database using get_diagram_question_from_db() function in mock_generator.py and combined with other question types to create comprehensive tests. The integration ensures balanced representation of visual assessment elements.
+
+## 9. Mock Test Generation
+
+### Test Assembly Algorithm
+The mock_generator.py implements subject-specific functions that assemble tests by combining multiple-choice questions from the database with advanced questions and diagram questions. Each subject function follows similar patterns while addressing subject-specific requirements.
+
+### Question Diversity and Balance
+Mock tests maintain balance across difficulty levels, question types (multiple-choice, numerical, diagram), and topics within each subject. The system ensures appropriate representation of fundamental and advanced concepts for comprehensive assessment.
+
+### Scoring and Evaluation Methodology
+Tests are evaluated based on correct answers, with different weights potentially assigned to questions based on difficulty and type. The submit_mock_answers() handler in app.py processes user responses and calculates scores transparently.
+
+### Mock Test Customization Options
+The system supports customization of test length, subject focus, and difficulty distribution to meet specific preparation needs. Future enhancements may include time-limited tests and more granular topic selection.
+
+## 10. User Interface and Experience
+
+### Learning Dashboard Design
+The dashboard provides an intuitive overview of progress, recommended topics, and available tests. The design emphasizes clarity and accessibility, with clear navigation paths to different learning activities.
+
+### Question Presentation Interface
+Questions are presented with clean formatting, clear options, and appropriate spacing. Diagram questions render SVG content in properly sized viewports with responsive behavior for different screen sizes.
+
+### Progress Visualization Components
+Visual elements such as progress bars, completion percentages, and difficulty level indicators help users understand their current status at a glance. Subject cards in the dashboard show summarized progress information.
+
+### Feedback Mechanisms
+After answering questions, users receive immediate feedback with detailed explanations for correct answers. The system highlights misconceptions and provides additional information to reinforce learning from incorrect answers.
+
+## 11. System Deployment
+
+### Infrastructure Requirements
+The application requires Python 3.8+, 8GB+ RAM, internet connectivity for API access, and sufficient storage for model files. The setup.py script automates dependency installation and environment configuration.
+
+### Installation and Setup Guide
+Deployment follows a streamlined process detailed in the README.md, with steps for environment setup, dependency installation, model training, and application launch. The setup process handles API key configuration and directory structure creation.
+
+### Performance Optimization
+The system uses asynchronous processing for API calls and database operations to maintain responsiveness. Caching mechanisms reduce redundant computations, and batch processing improves efficiency for resource-intensive operations.
+
+### Scaling Considerations
+The architecture supports horizontal scaling through containerization, with stateless request handling allowing for load balancing. Database connections use connection pooling to manage concurrent access efficiently.
+
+## 12. Maintenance and Updates
+
+### Data Refresh Workflow
+New questions can be added to the database through migration scripts like migrate_questions.py. The verify_migration.py and clean_duplicates.py utilities ensure data integrity during updates.
+
+### Model Retraining Schedule
+The BERT model should be retrained periodically (e.g., quarterly) as significant new question data becomes available. The training process is automated through the train_bert.py script with configurable parameters.
+
+### Question Pool Expansion
+The question pool grows through both automated generation and manual curation. New diagram questions require SVG creation, while text-based questions can be generated in batches using the question generation engine.
+
+### Feature Enhancement Roadmap
+Ongoing development includes expanding subject coverage, refining adaptive algorithms, enhancing visualization tools, and improving integration with external learning resources. The roadmap prioritizes features based on user feedback and educational impact.
+
+## 13. Troubleshooting and FAQs
+
+### Common Issues and Solutions
+Typical issues include API connectivity problems, model loading errors, and database connection failures. The README.md includes a troubleshooting section with step-by-step resolution procedures for frequent issues.
+
+### Performance Optimization Tips
+Performance can be improved by adjusting batch sizes, implementing request throttling for API calls, and optimizing database queries. Memory management is critical for model loading and processing.
+
+### Error Handling Procedures
+The application implements comprehensive error handling with specific error codes, detailed logging, and user-friendly error messages. Critical operations include fallback mechanisms to prevent system failures.
+
+### Support Resources
+Resources include documentation, error logs, and system diagnostics. The environment verification utilities help identify configuration issues and dependency problems quickly.
+
+## 14. Future Development Roadmap
+
+### Planned Enhancements
+Future developments include more advanced visualization tools, expanded subject coverage, integration with additional learning resources, and enhanced personalization algorithms for more targeted learning paths.
+
+### Research Directions
+Research focuses on improving question generation quality, refining adaptive algorithms based on learning theory, and implementing more sophisticated progress prediction models using collected user data.
+
+### Integration Possibilities
+The system architecture supports integration with external content providers, educational platforms, and alternative AI models. API endpoints could be exposed for third-party integrations in future versions.
+
+### Expansion to Additional Subjects
+The framework is designed to accommodate new subjects with minimal modifications. Adding a new subject requires defining topic structures, providing seed questions for BERT training, and configuring subject-specific generation parameters. 

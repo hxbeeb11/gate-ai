@@ -40,7 +40,6 @@ class AdaptiveLearningSystem:
         try:
             with open(self.topics_path, 'r', encoding='utf-8') as f:
                 self.topics_data = json.load(f)
-            print(f"Successfully loaded topics from {self.topics_path}")
             print(f"Available subjects: {[topic['title'] for topic in self.topics_data.get('topics', [])]}")
         except Exception as e:
             print(f"Error loading topics data: {str(e)}")
