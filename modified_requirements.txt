@@ -6,4 +6,5 @@ aiohttp==3.10.11
 pandas>=2.2.0
 numpy>=1.26.0
 tqdm==4.67.1
-gunicorn==21.2.0 
+gunicorn>=21.2.0
+gevent>=23.9.1 
